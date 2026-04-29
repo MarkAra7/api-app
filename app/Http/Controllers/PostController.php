@@ -21,7 +21,8 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
-        
+    $post = $request->user()->posts()->create($request->validated());
+    return response()->json($post, 201);
     }
 
     /**
@@ -37,7 +38,15 @@ class PostController extends Controller
      */
     public function update(UpdatePostRequest $request, Post $post)
     {
-        //
+
+        $fields = $request->validate([
+            'title' => 'required|max:255',
+            'body' => 'required'
+        ]);
+        $post = Post::findOrFail($id);
+        $post->update($fields);
+        return['post' => $post];
+
     }
 
     /**
@@ -45,6 +54,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        $post = Post::findOrFail($id);
+        $post->delete();
     }
 }
