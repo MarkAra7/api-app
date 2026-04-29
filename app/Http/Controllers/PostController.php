@@ -30,31 +30,44 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+    return response()->json($post);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePostRequest $request, Post $post)
-    {
-
-        $fields = $request->validate([
-            'title' => 'required|max:255',
-            'body' => 'required'
-        ]);
-        $post = Post::findOrFail($id);
-        $post->update($fields);
-        return['post' => $post];
-
+public function update(UpdatePostRequest $request, Post $post)
+{
+    if ($request->user()->id !== $post->user_id) {
+        return response()->json([
+            'message' => 'Unauthorized'
+        ], 403);
     }
+
+    $fields = $request->validated();
+
+    $post->update($fields);
+
+    return response()->json([
+        'post' => $post
+    ]);
+}
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Post $post)
+    public function destroy(Post $post, Request $request)
     {
-        $post = Post::findOrFail($id);
+    if ($request->user()->id !== $post->user_id) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
         $post->delete();
+
+        return response()->json([
+            'message' => 'Post deleted successfully'
+        ]);
     }
 }
